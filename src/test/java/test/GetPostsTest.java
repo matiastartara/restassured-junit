@@ -1,8 +1,6 @@
 package test;
 
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,13 +9,7 @@ import util.LoggerUtil;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-public class PostsTest {
-
-    @BeforeAll
-    static void setup() {
-        RestAssured.baseURI = "https://jsonplaceholder.typicode.com";
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-    }
+public class GetPostsTest extends BaseTest {
 
     @Test
     @Tag("smoke")
@@ -33,8 +25,8 @@ public class PostsTest {
                 .body("id", equalTo(1))
                 .body("title", equalTo("sunt aut facere repellat provident occaecati excepturi optio reprehenderit"))
                 .body("body", startsWith("quia et suscipit"))
-                .extract().
-                response();
+                .extract()
+                .response();
 
         LoggerUtil.info("Response (" + res.statusCode() + ", " + res.time() + " ms):\n" + res.asPrettyString());
     }
@@ -44,7 +36,7 @@ public class PostsTest {
     @DisplayName("GET all /posts returns a list of posts")
     void getAllPosts() {
         LoggerUtil.info("Requesting GET /posts");
-        Response rest = given()
+        Response res = given()
                 .contentType("application/json")
                 .when()
                 .get("/posts")
@@ -55,12 +47,12 @@ public class PostsTest {
                 .extract()
                 .response();
 
-        LoggerUtil.info(("Response (" + rest.statusCode() + ", " + rest.time() + " ms):\n" + rest.asPrettyString()));
+        LoggerUtil.info("Response (" + res.statusCode() + ", " + res.time() + " ms):\n" + res.asPrettyString());
     }
 
     @Test
     @Tag("regression")
-    @DisplayName("POST /posts creates a post")
+    @DisplayName("GET /posts/9999 returns 404 for a non-existent post")
     void getInvalidPost() {
         LoggerUtil.info("Requesting GET invalid /posts");
         Response res = given()
@@ -68,28 +60,6 @@ public class PostsTest {
                 .get("/posts/9999")
                 .then()
                 .statusCode(404)
-                .extract()
-                .response();
-
-        LoggerUtil.info("Response (" + res.statusCode() + ", " + res.time() + " ms):\n" + res.asPrettyString());
-    }
-
-    @Test
-    @Tag("regression")
-    @DisplayName("POST /posts creates a post")
-    void createPost() {
-        LoggerUtil.info("Requesting POST /posts");
-        Response res = given()
-                .contentType("application/json")
-                .body("{\"title\":\"foo\",\"body\":\"bar\",\"userId\":1}")
-                .when()
-                .post("/posts")
-                .then()
-                .statusCode(201)
-                .body("title", equalTo("foo"))
-                .body("body", equalTo("bar"))
-                .body("userId", equalTo(1))
-                .body("id", greaterThan(0))
                 .extract()
                 .response();
 
